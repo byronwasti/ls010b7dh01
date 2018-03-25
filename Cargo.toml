@@ -1,0 +1,6 @@
+[package]
+name = "ls010b7dh01"
+version = "0.1.0"
+authors = ["Byron Wasti <byron.wasti@gmail.com>"]
+
+[dependencies]
