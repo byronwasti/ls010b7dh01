@@ -1,6 +1,8 @@
 [package]
+authors = ["Byron Wasti <byron.wasti@gmail.com>"]
 name = "ls010b7dh01"
 version = "0.1.0"
-authors = ["Byron Wasti <byron.wasti@gmail.com>"]
 
 [dependencies]
+embedded-hal = "0.1.2"
+nb = "0.1.1"
