@@ -1,6 +1,19 @@
 [package]
 authors = ["Byron Wasti <byron.wasti@gmail.com>"]
 name = "ls010b7dh01"
+categories = [
+    "embedded",
+    "hardware-support",
+    "no-std",
+]
+description = "A platform agnostic driver for the LS010B7DH01 memory LCD display"
+keywords = [
+    "embedded-hal-driver",
+    "lcd",
+    "memory lcd",
+    "display",
+]
+repository = "https://github.com/byronwasti/ls010b7dh01"
 version = "0.1.0"
 
 [dependencies]
