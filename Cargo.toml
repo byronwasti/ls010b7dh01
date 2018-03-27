@@ -10,9 +10,10 @@ description = "A platform agnostic driver for the LS010B7DH01 memory LCD display
 keywords = [
     "embedded-hal-driver",
     "lcd",
-    "memory lcd",
+    "memory",
     "display",
 ]
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/byronwasti/ls010b7dh01"
 version = "0.1.0"
 
