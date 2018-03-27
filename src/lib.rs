@@ -49,7 +49,7 @@ where
     }
 
     pub fn write_pixel(&mut self, x: u8, y: u8, val: bool) {
-        if x > 128 || y > 128 {
+        if x >= 128 || y >= 128 {
             return
         }
 
@@ -102,7 +102,7 @@ where
         }
     }
 
-    pub fn draw_circle(&mut self, x0: u8, y0: u8, r: u8) {
+    pub fn draw_circle(&mut self, x0: u8, y0: u8, r: u8, value: bool) {
         let x0 = x0 as i32;
         let y0 = y0 as i32;
         let r = r as i32;
@@ -114,15 +114,15 @@ where
         let mut err: i32 = dx - (r << 1);
 
         while x >= y {
-            self.write_pixel((x0 + x) as u8, (y0 + y) as u8, true);
-            self.write_pixel((x0 + y) as u8, (y0 + x) as u8, true);
-            self.write_pixel((x0 - y) as u8, (y0 + x) as u8, true);
-            self.write_pixel((x0 - x) as u8, (y0 + y) as u8, true);
+            self.write_pixel((x0 + x) as u8, (y0 + y) as u8, value);
+            self.write_pixel((x0 + y) as u8, (y0 + x) as u8, value);
+            self.write_pixel((x0 - y) as u8, (y0 + x) as u8, value);
+            self.write_pixel((x0 - x) as u8, (y0 + y) as u8, value);
 
-            self.write_pixel((x0 - x) as u8, (y0 - y) as u8, true);
-            self.write_pixel((x0 - y) as u8, (y0 - x) as u8, true);
-            self.write_pixel((x0 + y) as u8, (y0 - x) as u8, true);
-            self.write_pixel((x0 + x) as u8, (y0 - y) as u8, true);
+            self.write_pixel((x0 - x) as u8, (y0 - y) as u8, value);
+            self.write_pixel((x0 - y) as u8, (y0 - x) as u8, value);
+            self.write_pixel((x0 + y) as u8, (y0 - x) as u8, value);
+            self.write_pixel((x0 + x) as u8, (y0 - y) as u8, value);
 
             if (err <= 0) {
                 y += 1;
@@ -136,15 +136,6 @@ where
                 err += dx - (r << 1);
             }
         }
-    }
-
-    pub fn write_dotted_line(&mut self) {
-        self.write_spi(&[ 0x80, 0x82,
-        0x33, 0x33, 0x33, 0x33,
-        0x33, 0x33, 0x33, 0x33,
-        0x33, 0x33, 0x33, 0x33,
-        0x33, 0x33, 0x33, 0x33,
-        0x00, 0x00 ]);
     }
 
     pub fn flush_buffer(&mut self) {
