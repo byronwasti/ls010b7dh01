@@ -26,6 +26,10 @@ where
     CS: OutputPin,
     DISP: OutputPin,
 {
+    /// Create a new Ls010b7dh01 object
+    ///
+    /// `disp` is the pin connected to the display_enable pin of
+    /// the memory LCD.
     pub fn new(spi: SPI, mut cs: CS, mut disp: DISP) -> Self {
         disp.set_low();
         cs.set_low();
@@ -40,14 +44,20 @@ where
         }
     }
 
+    /// Enable the LCD
     pub fn enable(&mut self) {
         self.disp.set_high();
     }
 
+    /// Disable the LCD
     pub fn disable(&mut self) {
         self.disp.set_low();
     }
 
+    /// Write a single pixel at (x, y) a given value
+    ///
+    /// true is a black pixel
+    /// false is a white pixel
     pub fn write_pixel(&mut self, x: u8, y: u8, val: bool) {
         if x >= 128 || y >= 128 {
             return
@@ -55,6 +65,8 @@ where
 
         let (bit, bucket) = buffer_position::get_position(x);
 
+        // Black is 0; white is 1 so to write a pixel
+        // we have to reset the bit
         if val {
             self.buffer[y as usize][bucket as usize] &= !(1 << bit);
         } else {
@@ -62,6 +74,8 @@ where
         }
     }
 
+    /// A demo function for writing every pixel in 
+    /// alternating off/on
     pub fn write_checkerboard(&mut self) {
         for i in 0..128 {
             for j in 0..64 {
@@ -70,7 +84,9 @@ where
         }
     }
 
-    /// X/Y are bottom left of rect
+    /// Draw a rectangle
+    ///
+    /// (x, y) are bottom right of the rectangle
     pub fn draw_rect(&mut self, x: u8, y: u8, width: u8, height: u8) {
         if x > 128 || y > 128 {
             return
@@ -102,6 +118,10 @@ where
         }
     }
 
+    /// Draw a Circle to the Buffer
+    ///
+    /// Note: This algorithm is pulled directly from wikipedia:
+    ///       https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
     pub fn draw_circle(&mut self, x0: u8, y0: u8, r: u8, value: bool) {
         let x0 = x0 as i32;
         let y0 = y0 as i32;
@@ -124,13 +144,13 @@ where
             self.write_pixel((x0 + y) as u8, (y0 - x) as u8, value);
             self.write_pixel((x0 + x) as u8, (y0 - y) as u8, value);
 
-            if (err <= 0) {
+            if err <= 0 {
                 y += 1;
                 err += dy;
                 dy += 2;
             }
 
-            if (err > 0) {
+            if err > 0 {
                 x -= 1;
                 dx += 2;
                 err += dx - (r << 1);
@@ -138,26 +158,28 @@ where
         }
     }
 
+    /// Draw the buffer to the screen
     pub fn flush_buffer(&mut self) {
         self.cs.set_high();
 
         // Write main message
-        self.spi.write(&[ 0x80 ]);
+        let _ = self.spi.write(&[ 0x80 ]);
 
         // Pack buffer into byte form and send
         let mut buffer = [0; 18];
         for i in 0..128 {
             buffer[0] = reverse_bits::msb2lsb(i+1);
             buffer[1..17].clone_from_slice(&self.buffer[i as usize][0..16]);
-            self.spi.write(&buffer);
+            let _ = self.spi.write(&buffer);
         }
 
         // Write our final ending
-        self.spi.write(&[0x00]);
+        let _ = self.spi.write(&[0x00]);
 
         self.cs.set_low();
     }
 
+    /// Clear the screen and the buffer
     pub fn clear(&mut self) {
         self.write_spi(&[0x20, 0x00]);
 
@@ -168,10 +190,12 @@ where
         }
     }
 
+    /// Enter display mode for power savings
     pub fn display_mode(&mut self) {
         self.write_spi(&[0x00, 0x00]);
     }
 
+    /// Internal function for handling the chip select
     fn write_spi(&mut self, data: &[u8]) {
         self.cs.set_high();
 
