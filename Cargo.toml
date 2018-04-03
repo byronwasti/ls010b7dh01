@@ -20,3 +20,4 @@ version = "0.1.0"
 [dependencies]
 embedded-hal = "0.1.2"
 nb = "0.1.1"
+embedded-graphics = { git = "https://github.com/jamwaffles/embedded-graphics" }

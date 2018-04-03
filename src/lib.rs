@@ -1,11 +1,14 @@
 #![no_std]
 extern crate embedded_hal as hal;
+extern crate embedded_graphics as graphics;
 mod reverse_bits;
 mod buffer_position;
 
 use hal::blocking::spi::Write;
 use hal::spi::{Mode, Phase, Polarity};
 use hal::digital::OutputPin;
+use graphics::Drawing;
+use graphics::drawable::Pixel;
 
 
 pub const MODE: Mode = Mode {
@@ -18,6 +21,22 @@ pub struct Ls010b7dh01<SPI, CS, DISP> {
     cs: CS,
     disp: DISP,
     buffer: [[u8; 16]; 128],
+}
+
+impl<SPI, CS, DISP, E> Drawing for Ls010b7dh01<SPI, CS, DISP>
+where
+    SPI: Write<u8, Error = E>,
+    CS: OutputPin,
+    DISP: OutputPin,
+{
+    fn draw<T>(&mut self, item_pixels: T) 
+    where T: Iterator<Item = Pixel>
+    {
+        for (coord, color) in item_pixels {
+            let (x, y) = coord;
+            self.write_pixel(x as u8, y as u8, color == 1);
+        }
+    }
 }
 
 impl<SPI, CS, DISP, E> Ls010b7dh01<SPI, CS, DISP>
